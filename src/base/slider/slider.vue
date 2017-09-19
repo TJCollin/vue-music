@@ -6,7 +6,7 @@
       </slot>
     </div>
     <div class="dots">
-
+      <span class="dot" v-for="(item, index) in dots" :class="{active: currentPageIndex === index }"></span>
     </div>
   </div>
 </template>
@@ -15,6 +15,12 @@
 import {addClass} from 'common/js/dom'
 import BScroll from 'better-scroll'
 export default {
+  data() {
+    return {
+      dots: [],
+      currentPageIndex: 0
+    }
+  },
   props: {
     loop: {
       type: Boolean,
@@ -32,11 +38,29 @@ export default {
   mounted() {
     setTimeout(() => {
       this._setSliderWidth()
+      this._initDots()
       this._initSlider()
     }, 20)
+
+    window.addEventListener('resize', () => {
+      if(!this.slider) {
+        return
+      }
+      this._setSliderWidth(true)
+      this.slider.refresh
+    })
+
+    if(this.autoPlay) {
+      this._play()
+    }
+
+
   },
   methods: {
-    _setSliderWidth() {
+    _initDots() {
+      this.dots = new Array(this.children.length)
+    },
+    _setSliderWidth(isResize) {
       this.children = this.$refs.sliderGroup.children
       //
       let width = 0
@@ -48,7 +72,7 @@ export default {
         width += sliderWidth
       }
       //
-      if(this.loop) {
+      if(this.loop && !isResize) {
         width += 2 * sliderWidth
       }
       this.$refs.sliderGroup.style.width = width + 'px'
@@ -58,19 +82,57 @@ export default {
         scrollX: true,
         scrollY: false,
         momentum: false,
-        snap: true,
-        snapLoop: true,
-        snapThreshold: 0.3,
-        snapSpeed: 400,
+        snap: {
+          loop: this.loop,
+          threshold: 0.3,
+          speed: 400
+        },
         click: true
       })
+
+      this.slider.on('scrollEnd', () => {
+        let pageIndex = this.slider.getCurrentPage().pageX
+        // console.log("pageIndex:" + pageIndex)
+        // console.log("currentPageIndex:" + this.currentPageIndex)
+        // console.log(this.loop)
+
+        if (this.loop) {
+          pageIndex -= 1
+        }
+        // console.log("pageIndex:" + pageIndex);
+        this.currentPageIndex = pageIndex
+
+        if(this.autoPlay) {
+
+          clearTimeout(this.timer)
+          this._play()
+        }
+      })
+    },
+    _play() {
+      // console.log("currentPageIndex:" + this.currentPageIndex);
+      let pageIndex = this.currentPageIndex + 1
+      // console.log("pageIndex:" + pageIndex)
+
+      if (this.loop) {
+        pageIndex += 1
+      }
+      // console.log("pageIndex:" + pageIndex);
+
+      this.timer = setTimeout(() => {
+        this.slider.goToPage(pageIndex, 0, 400)
+      }, this.interval);
     }
+  },
+  destroyed() {
+    clearTimeout(this.timer)  //当组件中用到timer时，在销毁时要清除
   }
-  }
+
+}
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-  @import "~common/stylus/variable";
+  @import "~common/stylus/variable"
 
   .slider
     min-height: 1px
@@ -94,6 +156,7 @@ export default {
     .dots
       position: absolute
       right: 0
+      left: 0
       bottom: 12px
       text-align: center
       font-size: 0
@@ -103,10 +166,9 @@ export default {
         width: 8px
         height: 8px
         border-radius: 50%
-        background: $color-text-1
+        background: $color-text-l
         &.active
           width: 20px
-          boder-radius: 5px
-          background: $color-text-11
-
+          border-radius: 5px
+          background: $color-text-ll
 </style>
