@@ -3,6 +3,11 @@ import Vue from 'vue'
 import App from './App'
 import fastclick from 'fastclick'
 import './common/stylus/index.styl'
+import VueLazyLoad from 'vue-lazyload'
+
+Vue.use(VueLazyLoad, {
+  loading: require('common/image/default.png')
+})
 
 import router from './router'
 
