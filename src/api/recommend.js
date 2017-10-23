@@ -15,11 +15,6 @@ export function getRecommend() {
 }
 
 export function getDiscList() {
-  const test = {
-    param: 'jsonpCallback',
-    // prefix: 'getPlaylist',
-    name: 'getPlaylist'
-  }
   // const url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
   const url = '/api/getDiscList'
 

@@ -26,24 +26,19 @@
       this._getSingerList()
     },
     methods: {
-      selectSinger(singer){
-        console.log('singer');
+      selectSinger(singer) {
         this.$router.push({
-          path: '/singer/${singer.id}'
+          path: `/singer/${singer.id}`
         })
-        // this.setSinger(singer)
-        this.$store.commit('SET_SINGER', singer)
+        this.setSinger(singer)
       },
       handlePlaylist(playlist) {
         const bottom = playlist.length > 0 ? '60px' : ''
         this.$refs.singer.style.bottom = bottom
         this.$refs.list.refresh()
       },
-      selectSinger(singer) {
-        this.$router.push({
-          path: `/singer/${singer.id}`
-        })
-      },
+
+
       _getSingerList() {
         getSingerList().then((res) => {
           if (res.code === ERR_OK) {
